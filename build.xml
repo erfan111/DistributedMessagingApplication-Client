@@ -1,0 +1,24 @@
+<project name="TextClient"  default="build"  basedir=".">
+
+	<property name="src" value="${basedir}/src" />
+	<property name="lib" value="${basedir}/lib" />
+	<property name="tmp" value="${basedir}/tmp" />
+	
+    <path id="classpath">
+        <fileset dir="${lib}"/>
+    </path>
+	
+	<target name="build">
+		<mkdir dir="${tmp}"/>
+		<javac debug="true" srcdir="${src}" destdir="${tmp}">
+			<classpath refid="classpath"/>
+		</javac>
+		<jar destfile="textclient.jar" basedir="${tmp}">
+            <manifest>
+	            <attribute name="Main-class" value="dev2dev.textclient.TextClient"/>
+	            <attribute name="Class-Path" value="lib/JainSipApi1.2.jar lib/log4j-1.2.8.jar lib/concurrent.jar lib/JainSipRi1.2.jar"/>
+            </manifest>
+		</jar>
+	</target>
+		
+</project> 
