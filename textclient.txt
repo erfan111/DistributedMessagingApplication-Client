@@ -3392,3 +3392,86 @@ Content-Length: 0
 ]]>
 </message>
 
+<!-- Use the  Trace Viewer in src/tools/tracesviewer to view this  trace  
+Here are the stack configuration properties 
+javax.sip.IP_ADDRESS= 192.168.2.2
+javax.sip.STACK_NAME= TextClient
+javax.sip.ROUTER_PATH= null
+javax.sip.OUTBOUND_PROXY= null
+-->
+<!-- Use the  Trace Viewer in src/tools/tracesviewer to view this  trace  
+Here are the stack configuration properties 
+javax.sip.IP_ADDRESS= 192.168.2.2
+javax.sip.STACK_NAME= TextClient
+javax.sip.ROUTER_PATH= null
+javax.sip.OUTBOUND_PROXY= null
+-->
+<message
+from="192.168.2.2:1214" 
+to="192.168.2.2:1213" 
+time="1476815178866"
+isSender="true" 
+transactionId="textclientv1.0:7d447bc5a77ad3e0751ba319e3549340@192.168.2.2:1:message:192.168.2.2:1214" 
+callId="7d447bc5a77ad3e0751ba319e3549340@192.168.2.2" 
+firstLine="MESSAGE sip:server@192.168.2.2:1213;transport=udp SIP/2.0" 
+>
+<![CDATA[MESSAGE sip:server@192.168.2.2:1213;transport=udp SIP/2.0
+Call-ID: 7d447bc5a77ad3e0751ba319e3549340@192.168.2.2
+CSeq: 1 MESSAGE
+From: "client" <sip:client@192.168.2.2:1214>;tag=textclientv1.0
+To: "server" <sip:server@192.168.2.2:1213>
+Via: SIP/2.0/UDP 192.168.2.2:1214;branch=branch1
+Max-Forwards: 70
+Contact: "client" <sip:client@192.168.2.2:1214>
+Content-Type: text/plain
+Content-Length: 2
+
+]]>
+</message>
+
+<message
+from="192.168.2.2:1214" 
+to="192.168.2.2:1213" 
+time="1476815200223"
+isSender="true" 
+transactionId="textclientv1.0:cd4b7d27c879ee78b582e14c3e32b887@192.168.2.2:1:message:192.168.2.2:1214" 
+callId="cd4b7d27c879ee78b582e14c3e32b887@192.168.2.2" 
+firstLine="MESSAGE sip:server@192.168.2.2:1213;transport=udp SIP/2.0" 
+>
+<![CDATA[MESSAGE sip:server@192.168.2.2:1213;transport=udp SIP/2.0
+Call-ID: cd4b7d27c879ee78b582e14c3e32b887@192.168.2.2
+CSeq: 1 MESSAGE
+From: "client" <sip:client@192.168.2.2:1214>;tag=textclientv1.0
+To: "server" <sip:server@192.168.2.2:1213>
+Via: SIP/2.0/UDP 192.168.2.2:1214;branch=branch1
+Max-Forwards: 70
+Contact: "client" <sip:client@192.168.2.2:1214>
+Content-Type: text/plain
+Content-Length: 2
+
+]]>
+</message>
+
+<message
+from="192.168.2.2:1214" 
+to="192.168.2.2:1213" 
+time="1476815202945"
+isSender="true" 
+transactionId="textclientv1.0:a0e0d85612fe0ef77c84c2c907d72b87@192.168.2.2:1:message:192.168.2.2:1214" 
+callId="a0e0d85612fe0ef77c84c2c907d72b87@192.168.2.2" 
+firstLine="MESSAGE sip:server@192.168.2.2:1213;transport=udp SIP/2.0" 
+>
+<![CDATA[MESSAGE sip:server@192.168.2.2:1213;transport=udp SIP/2.0
+Call-ID: a0e0d85612fe0ef77c84c2c907d72b87@192.168.2.2
+CSeq: 1 MESSAGE
+From: "client" <sip:client@192.168.2.2:1214>;tag=textclientv1.0
+To: "server" <sip:server@192.168.2.2:1213>
+Via: SIP/2.0/UDP 192.168.2.2:1214;branch=branch1
+Max-Forwards: 70
+Contact: "client" <sip:client@192.168.2.2:1214>
+Content-Type: text/plain
+Content-Length: 2
+
+]]>
+</message>
+
