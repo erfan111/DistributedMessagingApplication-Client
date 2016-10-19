@@ -1,16 +1,12 @@
 package dev2dev.textclient;
 
-import java.net.InetAddress;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.TooManyListenersException;
-
 import javax.sip.DialogTerminatedEvent;
 import javax.sip.IOExceptionEvent;
 import javax.sip.InvalidArgumentException;
 import javax.sip.ListeningPoint;
-import javax.sip.ObjectInUseException;
 import javax.sip.PeerUnavailableException;
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
@@ -22,7 +18,6 @@ import javax.sip.SipProvider;
 import javax.sip.SipStack;
 import javax.sip.TimeoutEvent;
 import javax.sip.TransactionTerminatedEvent;
-import javax.sip.TransportNotSupportedException;
 import javax.sip.address.Address;
 import javax.sip.address.AddressFactory;
 import javax.sip.address.SipURI;
@@ -39,8 +34,9 @@ import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
-@SuppressWarnings("ALL")
 public class SipLayer implements SipListener {
+
+    // *********************************************** Private variable ************************************************
 
     private MessageProcessor messageProcessor;
 
@@ -58,29 +54,33 @@ public class SipLayer implements SipListener {
 
     private SipProvider sipProvider;
 
-    /**
-     * Here we initialize the SIP stack.
-     */
-    public SipLayer(String username, String ip, int port)
-            throws PeerUnavailableException, TransportNotSupportedException,
-            InvalidArgumentException, ObjectInUseException,
-            TooManyListenersException {
+    // ************************************************* Constructors **************************************************
+
+    public SipLayer(String username, String ip, int port) throws Exception {
         setUsername(username);
-        sipFactory = SipFactory.getInstance();
-        sipFactory.setPathName("gov.nist");
+        initSip(ip, port);
+    }
+
+    // ************************************************ Helper methods *************************************************
+
+    private SipStack createSipStack(String ip) throws PeerUnavailableException {
+
         Properties properties = new Properties();
         properties.setProperty("javax.sip.STACK_NAME", "TextClient");
         properties.setProperty("javax.sip.IP_ADDRESS", ip);
-
-        //DEBUGGING: Information will go to files
-        //textclient.log and textclientdebug.log
         properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "32");
-        properties.setProperty("gov.nist.javax.sip.SERVER_LOG",
-                "textclient.txt");
-        properties.setProperty("gov.nist.javax.sip.DEBUG_LOG",
-                "textclientdebug.log");
+        properties.setProperty("gov.nist.javax.sip.SERVER_LOG", "textclient.txt");
+        properties.setProperty("gov.nist.javax.sip.DEBUG_LOG", "textclientdebug.log");
 
-        sipStack = sipFactory.createSipStack(properties);
+        return sipFactory.createSipStack(properties);
+    }
+
+    private void initSip(String ip, int port) throws Exception {
+
+        sipFactory = SipFactory.getInstance();
+        sipFactory.setPathName("gov.nist");
+
+        sipStack = createSipStack(ip);
         headerFactory = sipFactory.createHeaderFactory();
         addressFactory = sipFactory.createAddressFactory();
         messageFactory = sipFactory.createMessageFactory();
@@ -93,6 +93,8 @@ public class SipLayer implements SipListener {
         sipProvider = sipStack.createSipProvider(udp);
         sipProvider.addSipListener(this);
     }
+
+    // ************************************************ Message methods ************************************************
 
     /**
      * This method uses the SIP stack to send a message.
@@ -141,6 +143,24 @@ public class SipLayer implements SipListener {
         sipProvider.sendRequest(request);
     }
 
+    public void createResponse(Request req, int response_status_code) {
+        FromHeader from = (FromHeader) req.getHeader("From");
+//		messageProcessor.processMessage(from.getAddress().toString(),
+//				new String(req.getRawContent()));
+        Response response = null;
+        try {
+            response = messageFactory.createResponse(response_status_code, req);
+            ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
+            toHeader.setTag("888"); //This is mandatory as per the spec.
+            ServerTransaction st = sipProvider.getNewServerTransaction(req);
+            st.sendResponse(response);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            messageProcessor.processError("Can't send OK reply.");
+        }
+    }
+
+    // ********************************************* SipListener Interface *********************************************
 
     /**
      * This method is called by the SIP stack when a response arrives.
@@ -212,23 +232,6 @@ public class SipLayer implements SipListener {
 
     }
 
-    public void createResponse(Request req, int response_status_code) {
-        FromHeader from = (FromHeader) req.getHeader("From");
-//		messageProcessor.processMessage(from.getAddress().toString(),
-//				new String(req.getRawContent()));
-        Response response = null;
-        try {
-            response = messageFactory.createResponse(response_status_code, req);
-            ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
-            toHeader.setTag("888"); //This is mandatory as per the spec.
-            ServerTransaction st = sipProvider.getNewServerTransaction(req);
-            st.sendResponse(response);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            messageProcessor.processError("Can't send OK reply.");
-        }
-    }
-
     /**
      * This method is called by the SIP stack when there's no answer
      * to a message. Note that this is treated differently from an error
@@ -260,8 +263,10 @@ public class SipLayer implements SipListener {
     public void processTransactionTerminated(TransactionTerminatedEvent evt) {
     }
 
+
+    // ************************************************ Get/Set methods ************************************************
+
     public String getHost() {
-        int port = sipProvider.getListeningPoint().getPort();
         String host = sipStack.getIPAddress();
         return host;
     }
@@ -279,12 +284,10 @@ public class SipLayer implements SipListener {
         username = newUsername;
     }
 
-    public MessageProcessor getMessageProcessor() {
-        return messageProcessor;
-    }
-
     public void setMessageProcessor(MessageProcessor newMessageProcessor) {
         messageProcessor = newMessageProcessor;
     }
+
+    // ***************************************************** End *******************************************************
 
 }
