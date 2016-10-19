@@ -42,12 +42,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-public class TextClient 
-	extends JFrame
-	implements MessageProcessor
-{
+public class TextClient
+        extends JFrame
+        implements MessageProcessor {
     private SipLayer sipLayer;
-    
+
     private JTextField fromAddress;
     private JLabel fromLbl;
     private JLabel receivedLbl;
@@ -58,35 +57,31 @@ public class TextClient
     private JTextField sendMessages;
     private JTextField toAddress;
     private JLabel toLbl;
-	
-    public static void main(String[] args)
-    {
-        if(args.length != 2) {
-            printUsage();
-            System.exit(-1);            
-        }
-        
-		try
-        {
-		    String username = args[0];
-		    int port = Integer.parseInt(args[1]);
-		    String ip = InetAddress.getLocalHost().getHostAddress();
 
-			SipLayer sipLayer = new SipLayer(username, ip, port);
-		    TextClient tc = new TextClient(sipLayer);
-		    sipLayer.setMessageProcessor(tc);
-			
-			tc.show();
-        } catch (Throwable e)
-        {
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            printUsage();
+            System.exit(-1);
+        }
+
+        try {
+            String username = args[0];
+            int port = Integer.parseInt(args[1]);
+            String ip = InetAddress.getLocalHost().getHostAddress();
+
+            SipLayer sipLayer = new SipLayer(username, ip, port);
+            TextClient tc = new TextClient(sipLayer);
+            sipLayer.setMessageProcessor(tc);
+
+            tc.show();
+        } catch (Throwable e) {
             System.out.println("Problem initializing the SIP stack.");
             e.printStackTrace();
             System.exit(-1);
         }
     }
 
-    private static void printUsage()
-    {
+    private static void printUsage() {
         System.out.println("Syntax:");
         System.out.println("  java -jar textclient.jar <username> <port>");
         System.out.println("where <username> is the nickname of this user");
@@ -95,15 +90,14 @@ public class TextClient
         System.out.println("  java -jar textclient.jar snoopy71 5061");
     }
 
-    public TextClient(SipLayer sip)
-    {
+    public TextClient(SipLayer sip) {
         super();
         sipLayer = sip;
         initWindow();
         String from = "sip:" + sip.getUsername() + "@" + sip.getHost() + ":" + sip.getPort();
         this.fromAddress.setText(from);
     }
-    
+
     private void initWindow() {
         receivedLbl = new JLabel();
         sendLbl = new JLabel();
@@ -174,38 +168,33 @@ public class TextClient
         sendBtn.setBounds(200, 255, 75, 25);
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-288)/2, (screenSize.height-310)/2, 288, 320);
+        setBounds((screenSize.width - 288) / 2, (screenSize.height - 310) / 2, 288, 320);
     }
 
     private void sendBtnActionPerformed(ActionEvent evt) {
 
-        try
-        {
+        try {
             String to = this.toAddress.getText();
             String message = this.sendMessages.getText();
             sipLayer.sendMessage(to, message);
-        } catch (Throwable e)
-        {
+        } catch (Throwable e) {
             e.printStackTrace();
             this.receivedMessages.append("ERROR sending message: " + e.getMessage() + "\n");
         }
-        			
+
     }
 
-    public void processMessage(String sender, String message)
-    {
+    public void processMessage(String sender, String message) {
         this.receivedMessages.append("From " +
                 sender + ": " + message + "\n");
     }
 
-    public void processError(String errorMessage)
-    {
+    public void processError(String errorMessage) {
         this.receivedMessages.append("ERROR: " +
                 errorMessage + "\n");
     }
-    
-    public void processInfo(String infoMessage)
-    {
+
+    public void processInfo(String infoMessage) {
         this.receivedMessages.append(
                 infoMessage + "\n");
     }
