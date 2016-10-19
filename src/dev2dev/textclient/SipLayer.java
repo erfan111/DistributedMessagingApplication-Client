@@ -42,17 +42,13 @@ public class SipLayer implements SipListener {
 
     private String username;
 
-    private SipStack sipStack;
-
     private SipFactory sipFactory;
-
     private AddressFactory addressFactory;
-
     private HeaderFactory headerFactory;
-
     private MessageFactory messageFactory;
 
     private SipProvider sipProvider;
+    private SipStack sipStack;
 
     // ************************************************* Constructors **************************************************
 
@@ -135,11 +131,8 @@ public class SipLayer implements SipListener {
         sipProvider.sendRequest(request);
     }
 
-    public void createResponse(Request req, int response_status_code) {
-        FromHeader from = (FromHeader) req.getHeader("From");
-//		messageProcessor.processMessage(from.getAddress().toString(),
-//				new String(req.getRawContent()));
-        Response response = null;
+    public void createResponseForReceivedMessage(Request req, int response_status_code) {
+        Response response ;
         try {
             response = messageFactory.createResponse(response_status_code, req);
             ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
@@ -158,8 +151,10 @@ public class SipLayer implements SipListener {
      * This method is called by the SIP stack when a response arrives.
      */
     public void processResponse(ResponseEvent evt) {
+        //when send message we get response of send Request
         Response response = evt.getResponse();
         int status = response.getStatusCode();
+
 //		switch (status){
 //			case 100:
 //				messageProcessor.processInfo("--TRYING");
@@ -177,27 +172,15 @@ public class SipLayer implements SipListener {
             return;
         }
 
-//	messageProcessor.processError("Previous message not sent: " + status);
+	    messageProcessor.processError("Previous message not sent: " + status);
     }
 
     /**
      * This method is called by the SIP stack when a new request arrives.
      */
     public void processRequest(RequestEvent evt) {
-//	Request req = evt.getRequest();
-//
-//	String method = req.getMethod();
-//	switch(method){
-//		case "MESSAGE":
-//			createResponse(req, 200);
-//			messageProcessor.processMessage(evt.getRequest().getHeader("FROM").toString(),evt.getRequest().getContent().toString());
-//			break;
-//	}
-////	if (!method.equals("MESSAGE")) { //bad request type.
-////	    messageProcessor.processError("Bad request type: " + method);
-////	    return;
-////	}
-//
+        //when anyone sends message to me
+
         Request req = evt.getRequest();
 
         String method = req.getMethod();
@@ -206,22 +189,11 @@ public class SipLayer implements SipListener {
             return;
         }
 
-        FromHeader from = (FromHeader) req.getHeader("From");
+        FromHeader from = (FromHeader) req.getHeader(FromHeader.NAME);
         messageProcessor.processMessage(from.getAddress().toString(),
                 new String(req.getRawContent()));
-        Response response = null;
-        try { //Reply with OK
-            response = messageFactory.createResponse(200, req);
-            ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
-            toHeader.setTag("888"); //This is mandatory as per the spec.
-            ServerTransaction st = sipProvider.getNewServerTransaction(req);
-            st.sendResponse(response);
-            System.out.println("response sent 200");
-        } catch (Throwable e) {
-            e.printStackTrace();
-            messageProcessor.processError("Can't send OK reply.");
-        }
 
+        createResponseForReceivedMessage(req, 200);
     }
 
     /**
