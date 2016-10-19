@@ -102,18 +102,17 @@ public class SipLayer implements SipListener {
     public void sendMessage(String to, String message) throws ParseException,
             InvalidArgumentException, SipException {
 
-        FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory
-                , getUsername(), getHost() + ":" + getPort());
+
+        SipURI requestURI = addressFactory.createSipURI(getUsername(), Helper.getAddressFromSipUri(to));
+        requestURI.setTransportParam("udp");
+
+        FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
 
         ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, to);
 
-        SipURI requestURI = addressFactory.createSipURI(username, Helper.getAddressFromSipUri(to));
-        requestURI.setTransportParam("udp");
-
         ArrayList viaHeaders = new ArrayList();
-        ViaHeader viaHeader = headerFactory.createViaHeader(getHost(),
-                getPort(), "udp", "branch1");
-        viaHeaders.add(viaHeader);
+
+        viaHeaders.add(getSelfViaHeader());
 
         CallIdHeader callIdHeader = sipProvider.getNewCallId();
 
@@ -123,22 +122,15 @@ public class SipLayer implements SipListener {
         MaxForwardsHeader maxForwards = headerFactory
                 .createMaxForwardsHeader(70);
 
-        Request request = messageFactory.createRequest(requestURI,
-                Request.MESSAGE, callIdHeader, cSeqHeader, fromHeader,
-                toHeader, viaHeaders, maxForwards);
-
-        SipURI contactURI = addressFactory.createSipURI(getUsername(),
-                getHost());
-        contactURI.setPort(getPort());
-        Address contactAddress = addressFactory.createAddress(contactURI);
-        contactAddress.setDisplayName(getUsername());
-        ContactHeader contactHeader = headerFactory
-                .createContactHeader(contactAddress);
-        request.addHeader(contactHeader);
-
         ContentTypeHeader contentTypeHeader = headerFactory
                 .createContentTypeHeader("text", "plain");
-        request.setContent(message, contentTypeHeader);
+
+        Request request = messageFactory.createRequest(requestURI,
+                Request.MESSAGE, callIdHeader, cSeqHeader, fromHeader,
+                toHeader, viaHeaders, maxForwards,contentTypeHeader,
+                message);
+
+        request.addHeader(getSelfContactHeader());
 
         sipProvider.sendRequest(request);
     }
@@ -265,6 +257,20 @@ public class SipLayer implements SipListener {
 
 
     // ************************************************ Get/Set methods ************************************************
+
+    public String getAddress(){
+        return getHost() + ":" + getPort();
+    }
+
+    private ContactHeader getSelfContactHeader() throws ParseException {
+        Address contactAddress = Helper.createSipAddress(addressFactory, getUsername(), getAddress());
+        return headerFactory.createContactHeader(contactAddress);
+    }
+
+    private ViaHeader getSelfViaHeader() throws ParseException, InvalidArgumentException {
+        ViaHeader viaHeader = headerFactory.createViaHeader(getHost(), getPort(), "udp", "branch1");
+        return viaHeader;
+    }
 
     public String getHost() {
         String host = sipStack.getIPAddress();
