@@ -146,7 +146,8 @@ public class TextClient
         try {
             String to = this.toAddress.getText();
             String message = this.sendMessages.getText();
-            sipLayer.sendMessage(to, message);
+            if(!message.equals(""))
+                sipLayer.sendMessage(to, message);
         } catch (Throwable e) {
             e.printStackTrace();
             this.receivedMessages.append("ERROR sending message: " + e.getMessage() + "\n");
