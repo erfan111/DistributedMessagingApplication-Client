@@ -6,4 +6,6 @@ public interface MessageProcessor {
     void processError(String errorMessage);
 
     void processInfo(String infoMessage);
+
+    void processClientRegistered();
 }

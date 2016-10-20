@@ -127,18 +127,28 @@ public class TextClient
         getContentPane().add(toAddress);
         toAddress.setBounds(40, 225, 235, 21);
 
-        sendBtn.setText("Send");
         sendBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                sendBtnActionPerformed(evt);
+                if (sipLayer.getIsRegistered()){
+                    sendBtnActionPerformed(evt);
+                }else{
+                    registerBtnActionPerformed(evt);
+                }
             }
         });
 
         getContentPane().add(sendBtn);
         sendBtn.setBounds(200, 255, 75, 25);
 
+        if (sipLayer.getIsRegistered()){
+            setStateNotRegistered();
+        }else{
+            setStateNotRegistered();
+        }
+
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((screenSize.width - 288) / 2, (screenSize.height - 310) / 2, 288, 320);
+
     }
 
     private void sendBtnActionPerformed(ActionEvent evt) {
@@ -151,6 +161,18 @@ public class TextClient
         } catch (Throwable e) {
             e.printStackTrace();
             this.receivedMessages.append("ERROR sending message: " + e.getMessage() + "\n");
+        }
+
+    }
+
+    private void registerBtnActionPerformed(ActionEvent evt) {
+
+        try {
+            String serverAddress = this.toAddress.getText();
+            sipLayer.CallregisterRequest(serverAddress);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            this.receivedMessages.append("ERROR register" + e.getMessage() + "\n");
         }
 
     }
@@ -169,4 +191,30 @@ public class TextClient
         this.receivedMessages.append(
                 infoMessage + "\n");
     }
+
+    public void processClientRegistered(){
+        setStateRegistered();
+    }
+
+    private void setStateRegistered(){
+        sendBtn.setText("Send");
+        toLbl.setText("To:");
+        sendMessages.setVisible(true);
+        sendMessages.setText(sipLayer.getUsername());
+        sendLbl.setVisible(true);
+        receivedLbl.setVisible(true);
+        receivedScrollPane.setVisible(true);
+        toAddress.setText("sip:username@" + toAddress.getText());
+    }
+
+    private void setStateNotRegistered(){
+        sendBtn.setText("Register");
+        toLbl.setText("ServerAddress:");
+        sendMessages.setVisible(false);
+        sendLbl.setVisible(false);
+        receivedLbl.setVisible(false);
+        receivedScrollPane.setVisible(false);
+        toAddress.setText("IP:PORT");
+    }
+
 }

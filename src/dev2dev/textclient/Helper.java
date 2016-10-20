@@ -7,6 +7,7 @@ import javax.sip.header.FromHeader;
 import javax.sip.header.HeaderFactory;
 import javax.sip.header.ToHeader;
 import java.text.ParseException;
+import java.text.StringCharacterIterator;
 
 @SuppressWarnings("unused")
 public class Helper {
@@ -22,8 +23,7 @@ public class Helper {
     }
 
     public static String getPortFromSipUri(String uri) {
-        String temp = getAddressFromSipUri(uri);
-        return temp.substring(temp.indexOf(":") + 1);
+        return getPortFromAddress(getAddressFromSipUri(uri));
     }
 
     // *********************************************** Sip Header Helper ***********************************************
@@ -57,6 +57,16 @@ public class Helper {
         javax.sip.address.Address NameAddress = af.createAddress(Address);
         NameAddress.setDisplayName(username);
         return NameAddress;
+    }
+
+    // ********************************************** String Address Helper ***********************************************
+
+    public static String getPortFromAddress(String address){
+        return address.substring(address.indexOf(":") + 1);
+    }
+
+    public static String getIpFromAddress(String address){
+        return address.substring(0, address.indexOf(":"));
     }
 
     // ****************************************************** End ******************************************************

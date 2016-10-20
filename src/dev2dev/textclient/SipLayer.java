@@ -49,11 +49,13 @@ public class SipLayer implements SipListener {
 
     private SipProvider sipProvider;
     private SipStack sipStack;
+    private boolean isRegistered;
 
     // ************************************************* Constructors **************************************************
 
     public SipLayer(String username, String ip, int port) throws Exception {
         setUsername(username);
+        isRegistered = false;
         initSip(ip, port);
     }
 
@@ -91,6 +93,35 @@ public class SipLayer implements SipListener {
     }
 
     // ************************************************ Message methods ************************************************
+
+    public void CallregisterRequest(String serverAddress) throws ParseException,
+            InvalidArgumentException, SipException {
+        SipURI requestURI = addressFactory.createSipURI(getUsername(), serverAddress);
+        requestURI.setTransportParam("udp");
+
+        FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
+        ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, getUsername(), getAddress());
+
+        ArrayList viaHeaders = new ArrayList();
+        viaHeaders.add(getSelfViaHeader());
+
+        CallIdHeader callIdHeader = sipProvider.getNewCallId();
+
+        CSeqHeader cSeqHeader = headerFactory.createCSeqHeader(1,
+                Request.REGISTER);
+
+        MaxForwardsHeader maxForwards = headerFactory
+                .createMaxForwardsHeader(70);
+
+
+        Request request = messageFactory.createRequest(requestURI,
+                Request.REGISTER, callIdHeader, cSeqHeader, fromHeader,
+                toHeader, viaHeaders, maxForwards);
+
+        request.addHeader(getSelfContactHeader());
+
+        sipProvider.sendRequest(request);
+    }
 
     /**
      * This method uses the SIP stack to send a message.
@@ -155,24 +186,21 @@ public class SipLayer implements SipListener {
         Response response = evt.getResponse();
         int status = response.getStatusCode();
 
-//		switch (status){
-//			case 100:
-//				messageProcessor.processInfo("--TRYING");
-//				break;
-//			case 180:
-//				messageProcessor.processInfo("--RINGING");
-//				break;
-//			default:
-//				messageProcessor.processInfo(String.valueOf(status));
-//		}
 
-        if ((status >= 200) && (status < 300)) { //Success!
-            messageProcessor.processInfo("--Sent");
-            System.out.println("Message Recieved " + status);
+        if ((status >= 200) && (status < 300)) {
+            CSeqHeader ch = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
+            if (ch.getMethod().equals(Request.REGISTER)){
+                setIsRegistered(true);
+                messageProcessor.processInfo("REGISTER");
+                System.out.println("REGISTER is ok -> code: " + status);
+            }else{
+                messageProcessor.processInfo("--Sent");
+                System.out.println("Message Recieved " + status);
+            }
             return;
         }
 
-	    messageProcessor.processError("Previous message not sent: " + status);
+	    messageProcessor.processError("Previous request not sent: " + status);
     }
 
     /**
@@ -256,6 +284,17 @@ public class SipLayer implements SipListener {
 
     public String getUsername() {
         return username;
+    }
+
+    public boolean getIsRegistered(){
+        return isRegistered;
+    }
+
+    public void setIsRegistered(boolean isRegistered){
+        this.isRegistered = isRegistered;
+        if (isRegistered == true){
+            messageProcessor.processClientRegistered();
+        }
     }
 
     public void setUsername(String newUsername) {
