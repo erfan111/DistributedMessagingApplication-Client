@@ -1,6 +1,6 @@
 package dev2dev.textclient;
 
-public interface MessageProcessor {
+interface MessageProcessor {
     void processMessage(String sender, String message);
 
     void processError(String errorMessage);

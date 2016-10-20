@@ -1,7 +1,5 @@
 package dev2dev.textclient;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.InetAddress;
@@ -18,7 +16,6 @@ public class TextClient
     private SipLayer sipLayer;
 
     private JTextField fromAddress;
-    private JLabel fromLbl;
     private JLabel receivedLbl;
     private JTextArea receivedMessages;
     private JScrollPane receivedScrollPane;
@@ -28,6 +25,7 @@ public class TextClient
     private JTextField toAddress;
     private JLabel toLbl;
 
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         if (args.length != 2) {
             printUsage();
@@ -74,7 +72,7 @@ public class TextClient
         sendMessages = new JTextField();
         receivedScrollPane = new JScrollPane();
         receivedMessages = new JTextArea();
-        fromLbl = new JLabel();
+        JLabel fromLbl = new JLabel();
         fromAddress = new JTextField();
         toLbl = new JLabel();
         toAddress = new JTextField();
@@ -127,13 +125,11 @@ public class TextClient
         getContentPane().add(toAddress);
         toAddress.setBounds(40, 225, 235, 21);
 
-        sendBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                if (sipLayer.getIsRegistered()){
-                    sendBtnActionPerformed(evt);
-                }else{
-                    registerBtnActionPerformed(evt);
-                }
+        sendBtn.addActionListener(evt -> {
+            if (sipLayer.getIsRegistered()){
+                sendBtnActionPerformed();
+            }else{
+                registerBtnActionPerformed();
             }
         });
 
@@ -151,7 +147,7 @@ public class TextClient
 
     }
 
-    private void sendBtnActionPerformed(ActionEvent evt) {
+    private void sendBtnActionPerformed() {
 
         try {
             String to = this.toAddress.getText();
@@ -165,7 +161,7 @@ public class TextClient
 
     }
 
-    private void registerBtnActionPerformed(ActionEvent evt) {
+    private void registerBtnActionPerformed() {
 
         try {
             String serverAddress = this.toAddress.getText();

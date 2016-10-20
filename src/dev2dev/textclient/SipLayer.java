@@ -10,7 +10,6 @@ import javax.sip.ListeningPoint;
 import javax.sip.PeerUnavailableException;
 import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
-import javax.sip.ServerTransaction;
 import javax.sip.SipException;
 import javax.sip.SipFactory;
 import javax.sip.SipListener;
@@ -34,6 +33,7 @@ import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
+@SuppressWarnings("deprecation")
 public class SipLayer implements SipListener {
 
     // *********************************************** Private variable ************************************************
@@ -94,7 +94,7 @@ public class SipLayer implements SipListener {
 
     // ************************************************ Message methods ************************************************
 
-    public void CallregisterRequest(String serverAddress) throws ParseException,
+    void CallregisterRequest(String serverAddress) throws ParseException,
             InvalidArgumentException, SipException {
         SipURI requestURI = addressFactory.createSipURI(getUsername(), serverAddress);
         requestURI.setTransportParam("udp");
@@ -102,7 +102,7 @@ public class SipLayer implements SipListener {
         FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
         ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, getUsername(), getAddress());
 
-        ArrayList viaHeaders = new ArrayList();
+        ArrayList<ViaHeader> viaHeaders = new ArrayList<>();
         viaHeaders.add(getSelfViaHeader());
 
         CallIdHeader callIdHeader = sipProvider.getNewCallId();
@@ -126,7 +126,7 @@ public class SipLayer implements SipListener {
     /**
      * This method uses the SIP stack to send a message.
      */
-    public void sendMessage(String to, String message) throws ParseException,
+    void sendMessage(String to, String message) throws ParseException,
             InvalidArgumentException, SipException {
 
 
@@ -138,7 +138,7 @@ public class SipLayer implements SipListener {
         System.out.println("sendMessage:to:" + to);
         ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, to);
 
-        ArrayList viaHeaders = new ArrayList();
+        ArrayList<ViaHeader> viaHeaders = new ArrayList<>();
 
         viaHeaders.add(getSelfViaHeader());
 
@@ -163,7 +163,7 @@ public class SipLayer implements SipListener {
         sipProvider.sendRequest(request);
     }
 
-    public void createResponseForReceivedMessage(RequestEvent req, int response_status_code) {
+    private void createResponseForReceivedMessage(RequestEvent req, int response_status_code) {
         Response response ;
         try {
             response = messageFactory.createResponse(response_status_code, req.getRequest());
@@ -258,7 +258,7 @@ public class SipLayer implements SipListener {
 
     // ************************************************ Get/Set methods ************************************************
 
-    public String getAddress(){
+    private String getAddress(){
         return getHost() + ":" + getPort();
     }
 
@@ -268,40 +268,37 @@ public class SipLayer implements SipListener {
     }
 
     private ViaHeader getSelfViaHeader() throws ParseException, InvalidArgumentException {
-        ViaHeader viaHeader = headerFactory.createViaHeader(getHost(), getPort(), "udp", "branch1");
-        return viaHeader;
+        return headerFactory.createViaHeader(getHost(), getPort(), "udp", "branch1");
     }
 
-    public String getHost() {
-        String host = sipStack.getIPAddress();
-        return host;
+    String getHost() {
+        return sipStack.getIPAddress();
     }
 
-    public int getPort() {
-        int port = sipProvider.getListeningPoint().getPort();
-        return port;
+    int getPort() {
+        return sipProvider.getListeningPoint().getPort();
     }
 
-    public String getUsername() {
+    String getUsername() {
         return username;
     }
 
-    public boolean getIsRegistered(){
+    boolean getIsRegistered(){
         return isRegistered;
     }
 
-    public void setIsRegistered(boolean isRegistered){
+    private void setIsRegistered(boolean isRegistered){
         this.isRegistered = isRegistered;
-        if (isRegistered == true){
+        if (isRegistered){
             messageProcessor.processClientRegistered();
         }
     }
 
-    public void setUsername(String newUsername) {
+    private void setUsername(String newUsername) {
         username = newUsername;
     }
 
-    public void setMessageProcessor(MessageProcessor newMessageProcessor) {
+    void setMessageProcessor(MessageProcessor newMessageProcessor) {
         messageProcessor = newMessageProcessor;
     }
 
