@@ -104,6 +104,7 @@ public class SipLayer implements SipListener {
 
         FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
 
+        System.out.println("sendMessage:to:" + to);
         ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, to);
 
         ArrayList viaHeaders = new ArrayList();
@@ -190,7 +191,7 @@ public class SipLayer implements SipListener {
         }
 
         FromHeader from = (FromHeader) req.getHeader(FromHeader.NAME);
-        messageProcessor.processMessage(from.getAddress().toString(),
+        messageProcessor.processMessage(from.getAddress().getDisplayName(),
                 new String(req.getRawContent()));
 
         createResponseForReceivedMessage(req, 200);

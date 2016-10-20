@@ -29,11 +29,11 @@ public class Helper {
     // *********************************************** Sip Header Helper ***********************************************
 
     public static ToHeader createToHeader(AddressFactory af, HeaderFactory hf, String to) throws ParseException {
-        return createToHeader(af, hf, getAddressFromSipUri(to), getAddressFromSipUri(to));
+        return createToHeader(af, hf, getUserNameFromSipUri(to), getAddressFromSipUri(to));
     }
 
     public static FromHeader createFromHeader(AddressFactory af, HeaderFactory hf, String from) throws ParseException {
-        return createFromHeader(af, hf, getAddressFromSipUri(from), getAddressFromSipUri(from));
+        return createFromHeader(af, hf, getUserNameFromSipUri(from), getAddressFromSipUri(from));
     }
 
     public static ToHeader createToHeader(AddressFactory af, HeaderFactory hf, String username, String address)
