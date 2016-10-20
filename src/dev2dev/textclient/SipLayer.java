@@ -132,14 +132,13 @@ public class SipLayer implements SipListener {
         sipProvider.sendRequest(request);
     }
 
-    public void createResponseForReceivedMessage(Request req, int response_status_code) {
+    public void createResponseForReceivedMessage(RequestEvent req, int response_status_code) {
         Response response ;
         try {
-            response = messageFactory.createResponse(response_status_code, req);
-            ToHeader toHeader = (ToHeader) response.getHeader(ToHeader.NAME);
-            toHeader.setTag("888"); //This is mandatory as per the spec.
-            ServerTransaction st = sipProvider.getNewServerTransaction(req);
-            st.sendResponse(response);
+            response = messageFactory.createResponse(response_status_code, req.getRequest());
+            SipProvider p = (SipProvider) req.getSource();
+            p.sendResponse(response);
+
         } catch (Throwable e) {
             e.printStackTrace();
             messageProcessor.processError("Can't send OK reply.");
@@ -194,7 +193,7 @@ public class SipLayer implements SipListener {
         messageProcessor.processMessage(from.getAddress().getDisplayName(),
                 new String(req.getRawContent()));
 
-        createResponseForReceivedMessage(req, 200);
+        createResponseForReceivedMessage(evt, 200);
     }
 
     /**
