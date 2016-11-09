@@ -120,6 +120,8 @@ public class SipLayer implements SipListener {
 
         request.addHeader(getSelfContactHeader());
 
+        request.addHeader(headerFactory.createHeader(ServerConfig.RegisterHeader, ServerConfig.ClientRegister));
+
         sipProvider.sendRequest(request);
     }
 
