@@ -20,6 +20,7 @@ public class TextClient
     private JTextArea receivedMessages;
     private JScrollPane receivedScrollPane;
     private JButton sendBtn;
+    private JButton deRegisterBtn;
     private JLabel sendLbl;
     private JTextField sendMessages;
     private JTextField toAddress;
@@ -77,6 +78,7 @@ public class TextClient
         toLbl = new JLabel();
         toAddress = new JTextField();
         sendBtn = new JButton();
+        deRegisterBtn = new JButton();
 
         getContentPane().setLayout(null);
 
@@ -136,6 +138,13 @@ public class TextClient
         getContentPane().add(sendBtn);
         sendBtn.setBounds(200, 255, 75, 25);
 
+        deRegisterBtn.addActionListener(evt -> {
+            deRegisterBtnActionPerformed();
+        });
+
+        getContentPane().add(deRegisterBtn);
+        deRegisterBtn.setBounds(100, 255, 75, 25);
+
         if (sipLayer.getIsRegistered()){
             setStateNotRegistered();
         }else{
@@ -153,7 +162,11 @@ public class TextClient
             String to = this.toAddress.getText();
             String message = this.sendMessages.getText();
             if(!message.equals(""))
+            {
+                if (!to.contains("@"))
+                    to = "sip:" + to + "@" + sipLayer.serverRegistered.toString();
                 sipLayer.sendMessage(to, message);
+            }
         } catch (Throwable e) {
             e.printStackTrace();
             this.receivedMessages.append("ERROR sending message: " + e.getMessage() + "\n");
@@ -173,6 +186,17 @@ public class TextClient
 
     }
 
+    private void deRegisterBtnActionPerformed() {
+
+        try {
+            sipLayer.CallDeRegisterRequest();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            this.receivedMessages.append("ERROR deregister" + e.getMessage() + "\n");
+        }
+
+    }
+
     public void processMessage(String sender, String message) {
         this.receivedMessages.append("From " +
                 sender + ": " + message + "\n");
@@ -188,19 +212,24 @@ public class TextClient
                 infoMessage + "\n");
     }
 
-    public void processClientRegistered(){
-        setStateRegistered();
+    public void processClientRegisteration(boolean status){
+        if(status)
+            setStateRegistered();
+        else
+            setStateNotRegistered();
     }
 
     private void setStateRegistered(){
         sendBtn.setText("Send");
+        deRegisterBtn.setText("deReg");
+        deRegisterBtn.setVisible(true);
         toLbl.setText("To:");
         sendMessages.setVisible(true);
         sendMessages.setText(sipLayer.getUsername());
         sendLbl.setVisible(true);
         receivedLbl.setVisible(true);
         receivedScrollPane.setVisible(true);
-        toAddress.setText("sip:username@" + toAddress.getText());
+        toAddress.setText("");
     }
 
     private void setStateNotRegistered(){
@@ -211,6 +240,7 @@ public class TextClient
         receivedLbl.setVisible(false);
         receivedScrollPane.setVisible(false);
         toAddress.setText("IP:PORT");
+        deRegisterBtn.setVisible(false);
     }
 
 }

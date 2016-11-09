@@ -50,6 +50,7 @@ public class SipLayer implements SipListener {
     private SipProvider sipProvider;
     private SipStack sipStack;
     private boolean isRegistered;
+    public MyAddress serverRegistered;
 
     // ************************************************* Constructors **************************************************
 
@@ -96,6 +97,8 @@ public class SipLayer implements SipListener {
 
     void CallregisterRequest(String serverAddress) throws ParseException,
             InvalidArgumentException, SipException {
+        serverRegistered = new MyAddress(serverAddress);
+
         SipURI requestURI = addressFactory.createSipURI(getUsername(), serverAddress);
         requestURI.setTransportParam("udp");
 
@@ -125,6 +128,38 @@ public class SipLayer implements SipListener {
         sipProvider.sendRequest(request);
     }
 
+    void CallDeRegisterRequest() throws ParseException,
+            InvalidArgumentException, SipException {
+
+        SipURI requestURI = addressFactory.createSipURI(getUsername(), serverRegistered.toString());
+        requestURI.setTransportParam("udp");
+
+        FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
+        ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, getUsername(), getAddress());
+
+        ArrayList<ViaHeader> viaHeaders = new ArrayList<>();
+        viaHeaders.add(getSelfViaHeader());
+
+        CallIdHeader callIdHeader = sipProvider.getNewCallId();
+
+        CSeqHeader cSeqHeader = headerFactory.createCSeqHeader(1,
+                Request.REGISTER);
+
+        MaxForwardsHeader maxForwards = headerFactory
+                .createMaxForwardsHeader(70);
+
+
+        Request request = messageFactory.createRequest(requestURI,
+                Request.REGISTER, callIdHeader, cSeqHeader, fromHeader,
+                toHeader, viaHeaders, maxForwards);
+
+        request.addHeader(getSelfContactHeader());
+
+        request.addHeader(headerFactory.createHeader(ServerConfig.RegisterHeader, ServerConfig.ClientDeRegister));
+
+        sipProvider.sendRequest(request);
+    }
+
     /**
      * This method uses the SIP stack to send a message.
      */
@@ -132,7 +167,7 @@ public class SipLayer implements SipListener {
             InvalidArgumentException, SipException {
 
 
-        SipURI requestURI = addressFactory.createSipURI(getUsername(), Helper.getAddressFromSipUri(to));
+        SipURI requestURI = addressFactory.createSipURI(getUsername(), serverRegistered.toString());
         requestURI.setTransportParam("udp");
 
         FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
@@ -192,9 +227,15 @@ public class SipLayer implements SipListener {
         if ((status >= 200) && (status < 300)) {
             CSeqHeader ch = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
             if (ch.getMethod().equals(Request.REGISTER)){
-                setIsRegistered(true);
-                messageProcessor.processInfo("REGISTER");
-                System.out.println("REGISTER is ok -> code: " + status);
+                if(Helper.getHeaderValue(response.getHeader(ServerConfig.RegisterHeader)).equals(ServerConfig.ClientDeRegister)){
+                    setIsRegistered(false);
+                    messageProcessor.processInfo("DeREGISTER");
+                    System.out.println("DEREGISTER is ok -> code: " + status);
+                }else{
+                    setIsRegistered(true);
+                    messageProcessor.processInfo("REGISTER");
+                    System.out.println("REGISTER is ok -> code: " + status);
+                }
             }else{
                 messageProcessor.processInfo("--Sent");
                 System.out.println("Message Recieved " + status);
@@ -291,9 +332,7 @@ public class SipLayer implements SipListener {
 
     private void setIsRegistered(boolean isRegistered){
         this.isRegistered = isRegistered;
-        if (isRegistered){
-            messageProcessor.processClientRegistered();
-        }
+        messageProcessor.processClientRegisteration(isRegistered);
     }
 
     private void setUsername(String newUsername) {
