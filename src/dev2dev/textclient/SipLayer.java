@@ -332,7 +332,7 @@ public class SipLayer implements SipListener {
 
     private void setIsRegistered(boolean isRegistered){
         this.isRegistered = isRegistered;
-        messageProcessor.processClientRegisteration(isRegistered);
+        messageProcessor.processClientRegistration(isRegistered);
     }
 
     private void setUsername(String newUsername) {

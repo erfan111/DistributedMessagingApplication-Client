@@ -7,5 +7,5 @@ interface MessageProcessor {
 
     void processInfo(String infoMessage);
 
-    void processClientRegisteration(boolean status);
+    void processClientRegistration(boolean status);
 }

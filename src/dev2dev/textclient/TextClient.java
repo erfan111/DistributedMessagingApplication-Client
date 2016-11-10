@@ -1,5 +1,6 @@
 package dev2dev.textclient;
 
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.InetAddress;
@@ -18,6 +19,8 @@ public class TextClient
     private JTextField fromAddress;
     private JLabel receivedLbl;
     private JTextArea receivedMessages;
+    private JTextField authoritativeServer;
+    private JLabel authoritativeServerLbl;
     private JScrollPane receivedScrollPane;
     private JButton sendBtn;
     private JButton deRegisterBtn;
@@ -26,7 +29,6 @@ public class TextClient
     private JTextField toAddress;
     private JLabel toLbl;
 
-    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
         if (args.length != 2) {
             printUsage();
@@ -42,7 +44,7 @@ public class TextClient
             TextClient tc = new TextClient(sipLayer);
             sipLayer.setMessageProcessor(tc);
 
-            tc.show();
+            tc.setVisible(true);
         } catch (Throwable e) {
             System.out.println("Problem initializing the SIP stack.");
             e.printStackTrace();
@@ -73,6 +75,8 @@ public class TextClient
         sendMessages = new JTextField();
         receivedScrollPane = new JScrollPane();
         receivedMessages = new JTextArea();
+        authoritativeServer = new JTextField();
+        authoritativeServerLbl = new JLabel();
         JLabel fromLbl = new JLabel();
         fromAddress = new JTextField();
         toLbl = new JLabel();
@@ -93,14 +97,20 @@ public class TextClient
         receivedLbl.setAlignmentY(0.0F);
         receivedLbl.setPreferredSize(new java.awt.Dimension(25, 100));
         getContentPane().add(receivedLbl);
-        receivedLbl.setBounds(5, 0, 136, 20);
-
+        receivedLbl.setBounds(5, 0, 150, 20);
+        authoritativeServerLbl.setBounds(5,150,85,20);
+        getContentPane().add(authoritativeServerLbl);
+        authoritativeServerLbl.setText("My Server:");
+        authoritativeServer.setBounds(95,150,170,20);
+        getContentPane().add(authoritativeServer);
+        authoritativeServer.setText("Not Connected");
+        authoritativeServer.setEditable(false);
         sendLbl.setText("Send Message:");
         getContentPane().add(sendLbl);
-        sendLbl.setBounds(5, 150, 90, 20);
+        sendLbl.setBounds(5, 170, 120, 20);
 
         getContentPane().add(sendMessages);
-        sendMessages.setBounds(5, 170, 270, 20);
+        sendMessages.setBounds(5, 190, 270, 20);
 
         receivedMessages.setAlignmentX(0.0F);
         receivedMessages.setEditable(false);
@@ -114,18 +124,18 @@ public class TextClient
 
         fromLbl.setText("From:");
         getContentPane().add(fromLbl);
-        fromLbl.setBounds(5, 200, 35, 15);
+        fromLbl.setBounds(5, 220, 55, 15);
 
         getContentPane().add(fromAddress);
-        fromAddress.setBounds(40, 200, 235, 20);
+        fromAddress.setBounds(60, 220, 235, 20);
         fromAddress.setEditable(false);
 
         toLbl.setText("To:");
         getContentPane().add(toLbl);
-        toLbl.setBounds(5, 225, 35, 15);
+        toLbl.setBounds(5, 245, 55, 15);
 
         getContentPane().add(toAddress);
-        toAddress.setBounds(40, 225, 235, 21);
+        toAddress.setBounds(60, 245, 235, 21);
 
         sendBtn.addActionListener(evt -> {
             if (sipLayer.getIsRegistered()){
@@ -136,14 +146,15 @@ public class TextClient
         });
 
         getContentPane().add(sendBtn);
-        sendBtn.setBounds(200, 255, 75, 25);
+        sendBtn.setBounds(190, 275, 100, 25);
 
         deRegisterBtn.addActionListener(evt -> {
             deRegisterBtnActionPerformed();
         });
 
         getContentPane().add(deRegisterBtn);
-        deRegisterBtn.setBounds(100, 255, 75, 25);
+        deRegisterBtn.setBounds(100, 275, 85, 25);
+        deRegisterBtn.setBackground(Color.RED);
 
         if (sipLayer.getIsRegistered()){
             setStateNotRegistered();
@@ -152,7 +163,7 @@ public class TextClient
         }
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width - 288) / 2, (screenSize.height - 310) / 2, 288, 320);
+        setBounds((screenSize.width - 300) / 2, (screenSize.height - 340) / 2, 300, 340);
 
     }
 
@@ -212,7 +223,7 @@ public class TextClient
                 infoMessage + "\n");
     }
 
-    public void processClientRegisteration(boolean status){
+    public void processClientRegistration(boolean status){
         if(status)
             setStateRegistered();
         else
@@ -230,17 +241,19 @@ public class TextClient
         receivedLbl.setVisible(true);
         receivedScrollPane.setVisible(true);
         toAddress.setText("");
+        authoritativeServer.setText(sipLayer.serverRegistered.toString());
     }
 
     private void setStateNotRegistered(){
         sendBtn.setText("Register");
-        toLbl.setText("ServerAddress:");
+        toLbl.setText("Server:");
         sendMessages.setVisible(false);
         sendLbl.setVisible(false);
         receivedLbl.setVisible(false);
         receivedScrollPane.setVisible(false);
         toAddress.setText("IP:PORT");
         deRegisterBtn.setVisible(false);
+        authoritativeServer.setText("Not Connected");
     }
 
 }
