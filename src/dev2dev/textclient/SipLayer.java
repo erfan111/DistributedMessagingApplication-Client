@@ -167,13 +167,14 @@ public class SipLayer implements SipListener {
             InvalidArgumentException, SipException {
 
 
-        SipURI requestURI = addressFactory.createSipURI(getUsername(), serverRegistered.toString());
+        SipURI requestURI = addressFactory.createSipURI(getUsername(), serverRegistered.toString());//?
+
         requestURI.setTransportParam("udp");
 
         FromHeader fromHeader = Helper.createFromHeader(addressFactory, headerFactory, getUsername(), getAddress());
 
         System.out.println("sendMessage:to:" + to);
-        ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, to);
+        ToHeader toHeader = Helper.createToHeader(addressFactory, headerFactory, to);//?
 
         ArrayList<ViaHeader> viaHeaders = new ArrayList<>();
 
@@ -204,6 +205,10 @@ public class SipLayer implements SipListener {
         Response response ;
         try {
             response = messageFactory.createResponse(response_status_code, req.getRequest());
+            CallIdHeader callIdHeader = (CallIdHeader) req.getRequest().getHeader(CallIdHeader.NAME);
+            ToHeader toHeader = (ToHeader) req.getRequest().getHeader(ToHeader.NAME);
+            response.setHeader(callIdHeader);
+            response.setHeader(toHeader);
             SipProvider p = (SipProvider) req.getSource();
             p.sendResponse(response);
 
@@ -223,20 +228,31 @@ public class SipLayer implements SipListener {
         Response response = evt.getResponse();
         int status = response.getStatusCode();
 
+        System.out.println("-111");
 
         if ((status >= 200) && (status < 300)) {
             CSeqHeader ch = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
+            System.out.println(ch.getMethod() + "");
             if (ch.getMethod().equals(Request.REGISTER)){
+
+                System.out.println("222");
                 if(Helper.getHeaderValue(response.getHeader(ServerConfig.RegisterHeader)).equals(ServerConfig.ClientDeRegister)){
                     setIsRegistered(false);
+
+                    System.out.println("6666");
                     messageProcessor.processInfo("DeREGISTER");
                     System.out.println("DEREGISTER is ok -> code: " + status);
                 }else{
+
+                    System.out.println("555");
+
                     setIsRegistered(true);
                     messageProcessor.processInfo("REGISTER");
                     System.out.println("REGISTER is ok -> code: " + status);
                 }
             }else{
+
+                System.out.println("333");
                 messageProcessor.processInfo("--Sent");
                 System.out.println("Message Recieved " + status);
             }
