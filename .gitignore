@@ -4,3 +4,4 @@ bin/
 production/*
 TextClient.iml
 textclient.txt
+out/
