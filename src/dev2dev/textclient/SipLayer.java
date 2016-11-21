@@ -227,34 +227,22 @@ public class SipLayer implements SipListener {
         //when send message we get response of send Request
         Response response = evt.getResponse();
         int status = response.getStatusCode();
-
-        System.out.println("-111");
-
         if ((status >= 200) && (status < 300)) {
             CSeqHeader ch = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
             System.out.println(ch.getMethod() + "");
             if (ch.getMethod().equals(Request.REGISTER)){
-
-                System.out.println("222");
                 if(Helper.getHeaderValue(response.getHeader(ServerConfig.RegisterHeader)).equals(ServerConfig.ClientDeRegister)){
                     setIsRegistered(false);
-
-                    System.out.println("6666");
                     messageProcessor.processInfo("DeREGISTER");
                     System.out.println("DEREGISTER is ok -> code: " + status);
                 }else{
-
-                    System.out.println("555");
-
                     setIsRegistered(true);
                     messageProcessor.processInfo("REGISTER");
                     System.out.println("REGISTER is ok -> code: " + status);
                 }
             }else{
-
-                System.out.println("333");
                 messageProcessor.processInfo("--Sent");
-                System.out.println("Message Recieved " + status);
+                System.out.println("Message Received " + status);
             }
             return;
         }
