@@ -256,7 +256,7 @@ Distributed
 
 We have developed a “Monolithic Architecture” that we will introduce them in the future.
 
-![alt tag](https://raw.githubusercontent.com/erfan111/DistributedMessagingApplication-Client/master/o1.png)
+![alt tag](https://github.com/erfan111/DistributedMessagingApplication-Client/blob/master/o1.png?raw=true)
 
 
 # System Components
