@@ -98,10 +98,10 @@ public class TextClient
         receivedLbl.setPreferredSize(new java.awt.Dimension(25, 100));
         getContentPane().add(receivedLbl);
         receivedLbl.setBounds(5, 0, 150, 20);
-        authoritativeServerLbl.setBounds(5,150,85,20);
+        authoritativeServerLbl.setBounds(5, 150, 85, 20);
         getContentPane().add(authoritativeServerLbl);
         authoritativeServerLbl.setText("My Server:");
-        authoritativeServer.setBounds(95,150,170,20);
+        authoritativeServer.setBounds(95, 150, 170, 20);
         getContentPane().add(authoritativeServer);
         authoritativeServer.setText("Not Connected");
         authoritativeServer.setEditable(false);
@@ -138,9 +138,9 @@ public class TextClient
         toAddress.setBounds(60, 245, 235, 21);
 
         sendBtn.addActionListener(evt -> {
-            if (sipLayer.getIsRegistered()){
+            if (sipLayer.getIsRegistered()) {
                 sendBtnActionPerformed();
-            }else{
+            } else {
                 registerBtnActionPerformed();
             }
         });
@@ -156,9 +156,9 @@ public class TextClient
         deRegisterBtn.setBounds(100, 275, 85, 25);
         deRegisterBtn.setBackground(Color.RED);
 
-        if (sipLayer.getIsRegistered()){
+        if (sipLayer.getIsRegistered()) {
             setStateNotRegistered();
-        }else{
+        } else {
             setStateNotRegistered();
         }
 
@@ -172,8 +172,7 @@ public class TextClient
         try {
             String to = this.toAddress.getText();
             String message = this.sendMessages.getText();
-            if(!message.equals(""))
-            {
+            if (!message.equals("")) {
                 if (!to.contains("@"))
                     to = "sip:" + to + "@" + sipLayer.serverRegistered.toString();
                 sipLayer.sendMessage(to, message);
@@ -223,14 +222,14 @@ public class TextClient
                 infoMessage + "\n");
     }
 
-    public void processClientRegistration(boolean status){
-        if(status)
+    public void processClientRegistration(boolean status) {
+        if (status)
             setStateRegistered();
         else
             setStateNotRegistered();
     }
 
-    private void setStateRegistered(){
+    private void setStateRegistered() {
         sendBtn.setText("Send");
         deRegisterBtn.setText("deReg");
         deRegisterBtn.setVisible(true);
@@ -244,7 +243,7 @@ public class TextClient
         authoritativeServer.setText(sipLayer.serverRegistered.toString());
     }
 
-    private void setStateNotRegistered(){
+    private void setStateNotRegistered() {
         sendBtn.setText("Register");
         toLbl.setText("Server:");
         sendMessages.setVisible(false);

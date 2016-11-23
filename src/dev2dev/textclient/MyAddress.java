@@ -4,7 +4,7 @@ public class MyAddress {
     public String ip;
     public int port;
 
-    public MyAddress(String address){
+    public MyAddress(String address) {
         this(Helper.getIpFromAddress(address), Helper.getPortFromAddress(address));
     }
 

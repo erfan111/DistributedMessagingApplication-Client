@@ -193,7 +193,7 @@ public class SipLayer implements SipListener {
 
         Request request = messageFactory.createRequest(requestURI,
                 Request.MESSAGE, callIdHeader, cSeqHeader, fromHeader,
-                toHeader, viaHeaders, maxForwards,contentTypeHeader,
+                toHeader, viaHeaders, maxForwards, contentTypeHeader,
                 message);
 
         request.addHeader(getSelfContactHeader());
@@ -202,7 +202,7 @@ public class SipLayer implements SipListener {
     }
 
     private void createResponseForReceivedMessage(RequestEvent req, int response_status_code) {
-        Response response ;
+        Response response;
         try {
             response = messageFactory.createResponse(response_status_code, req.getRequest());
             CallIdHeader callIdHeader = (CallIdHeader) req.getRequest().getHeader(CallIdHeader.NAME);
@@ -230,24 +230,24 @@ public class SipLayer implements SipListener {
         if ((status >= 200) && (status < 300)) {
             CSeqHeader ch = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
             System.out.println(ch.getMethod() + "");
-            if (ch.getMethod().equals(Request.REGISTER)){
-                if(Helper.getHeaderValue(response.getHeader(ServerConfig.RegisterHeader)).equals(ServerConfig.ClientDeRegister)){
+            if (ch.getMethod().equals(Request.REGISTER)) {
+                if (Helper.getHeaderValue(response.getHeader(ServerConfig.RegisterHeader)).equals(ServerConfig.ClientDeRegister)) {
                     setIsRegistered(false);
                     messageProcessor.processInfo("DeREGISTER");
                     System.out.println("DEREGISTER is ok -> code: " + status);
-                }else{
+                } else {
                     setIsRegistered(true);
                     messageProcessor.processInfo("REGISTER");
                     System.out.println("REGISTER is ok -> code: " + status);
                 }
-            }else{
+            } else {
                 messageProcessor.processInfo("--Sent");
                 System.out.println("Message Received " + status);
             }
             return;
         }
 
-	    messageProcessor.processError("Previous request not sent: " + status);
+        messageProcessor.processError("Previous request not sent: " + status);
     }
 
     /**
@@ -305,7 +305,7 @@ public class SipLayer implements SipListener {
 
     // ************************************************ Get/Set methods ************************************************
 
-    private String getAddress(){
+    private String getAddress() {
         return getHost() + ":" + getPort();
     }
 
@@ -330,11 +330,11 @@ public class SipLayer implements SipListener {
         return username;
     }
 
-    boolean getIsRegistered(){
+    boolean getIsRegistered() {
         return isRegistered;
     }
 
-    private void setIsRegistered(boolean isRegistered){
+    private void setIsRegistered(boolean isRegistered) {
         this.isRegistered = isRegistered;
         messageProcessor.processClientRegistration(isRegistered);
     }

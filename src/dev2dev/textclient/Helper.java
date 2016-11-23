@@ -12,7 +12,7 @@ import java.text.ParseException;
 @SuppressWarnings("unused")
 class Helper {
 
-    public static String getHeaderValue(Header header){
+    public static String getHeaderValue(Header header) {
         return header.toString().trim().split(" ")[1];
     }
 
@@ -63,11 +63,11 @@ class Helper {
 
     // ********************************************** String MyAddress Helper ***********************************************
 
-    public static String getPortFromAddress(String address){
+    public static String getPortFromAddress(String address) {
         return address.substring(address.indexOf(":") + 1);
     }
 
-    public static String getIpFromAddress(String address){
+    public static String getIpFromAddress(String address) {
         return address.substring(0, address.indexOf(":"));
     }
 
